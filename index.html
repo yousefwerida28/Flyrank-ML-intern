@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Structured Content Archetype Clustering for Content Prioritization</title>
+  <meta name="description" content="FlyRank ML Internship capstone: structured content archetype clustering using October 2025 through March 2026 search-performance data.">
+  <style>
+    :root {
+      --bg: #f7f7f5;
+      --card: #ffffff;
+      --text: #171717;
+      --muted: #666;
+      --line: #deded8;
+      --accent: #111;
+      --soft: #f0f0eb;
+      --max: 980px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.65;
+    }
+    .wrap { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
+    header {
+      background: var(--card);
+      border-bottom: 1px solid var(--line);
+      padding: 72px 0 56px;
+    }
+    .eyebrow {
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 18px;
+    }
+    h1 {
+      font-size: clamp(38px, 6vw, 64px);
+      line-height: 1.04;
+      letter-spacing: -.045em;
+      margin: 0 0 22px;
+      max-width: 900px;
+    }
+    .dek {
+      font-size: 20px;
+      color: #4d4d4d;
+      max-width: 780px;
+      margin: 0;
+    }
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(255,255,255,.94);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--line);
+    }
+    nav .wrap {
+      display: flex;
+      gap: 18px;
+      overflow-x: auto;
+      padding-top: 13px;
+      padding-bottom: 13px;
+    }
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+      white-space: nowrap;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    nav a:hover { color: var(--text); }
+    main { padding: 44px 0 80px; }
+    section { margin: 0 0 68px; scroll-margin-top: 70px; }
+    h2 {
+      font-size: 30px;
+      letter-spacing: -.025em;
+      margin: 0 0 22px;
+      padding-top: 8px;
+    }
+    h3 {
+      font-size: 20px;
+      margin: 34px 0 12px;
+    }
+    p { margin: 0 0 17px; }
+    ul { margin-top: 8px; }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 34px;
+    }
+    .stat {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 20px;
+    }
+    .stat .value {
+      display: block;
+      font-size: 28px;
+      font-weight: 750;
+      letter-spacing: -.03em;
+    }
+    .stat .label {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 5px;
+    }
+    .callout {
+      border-left: 4px solid var(--accent);
+      background: var(--soft);
+      padding: 20px 22px;
+      margin: 26px 0;
+      border-radius: 0 10px 10px 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 20px 0 26px;
+      font-size: 14px;
+    }
+    th, td {
+      text-align: left;
+      padding: 13px 14px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+    th { background: var(--soft); font-weight: 700; }
+    tr:last-child td { border-bottom: 0; }
+    code {
+      background: var(--soft);
+      border-radius: 5px;
+      padding: 2px 5px;
+      font-size: .9em;
+    }
+    pre {
+      background: #181818;
+      color: #f3f3f3;
+      padding: 20px;
+      border-radius: 12px;
+      overflow-x: auto;
+      line-height: 1.55;
+      font-size: 13px;
+    }
+    .comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin: 25px 0;
+    }
+    .metric-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 22px;
+    }
+    .metric-card strong {
+      display: block;
+      font-size: 34px;
+      letter-spacing: -.04em;
+    }
+    .metric-card span { color: var(--muted); font-size: 13px; }
+    .bar-row { margin: 16px 0; }
+    .bar-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+    .bar-track {
+      height: 12px;
+      background: #e5e5df;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      background: #333;
+      border-radius: 999px;
+    }
+    .footnote {
+      color: var(--muted);
+      font-size: 13px;
+    }
+    footer {
+      background: #181818;
+      color: #ddd;
+      padding: 38px 0;
+    }
+    footer a { color: white; }
+    @media (max-width: 760px) {
+      .hero-grid { grid-template-columns: 1fr 1fr; }
+      .comparison { grid-template-columns: 1fr; }
+      header { padding-top: 48px; }
+      h2 { font-size: 26px; }
+      table { font-size: 13px; }
+    }
+    @media (max-width: 480px) {
+      .hero-grid { grid-template-columns: 1fr; }
+    }
+    @media print {
+      nav { display: none; }
+      header { border: 0; }
+      body { background: white; }
+      section { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="eyebrow">FlyRank ML Internship · Lane 3 · Capstone Research Paper</div>
+    <h1>Structured Content Archetype Clustering for Content Prioritization</h1>
+    <p class="dek">
+      A data-driven segmentation of content pages using search visibility, clicks, CTR,
+      and observed performance trends from October 2025 through March 2026.
+    </p>
+
+    <div class="hero-grid">
+      <div class="stat"><span class="value">254,802</span><span class="label">pages analyzed</span></div>
+      <div class="stat"><span class="value">6</span><span class="label">clustering features</span></div>
+      <div class="stat"><span class="value">K = 5</span><span class="label">final K-Means model</span></div>
+      <div class="stat"><span class="value">0.889132</span><span class="label">K-Means silhouette</span></div>
+    </div>
+  </div>
+</header>
+
+<nav>
+  <div class="wrap">
+    <a href="#abstract">Abstract</a>
+    <a href="#introduction">Introduction</a>
+    <a href="#data">Data</a>
+    <a href="#methodology">Methodology</a>
+    <a href="#results">Results</a>
+    <a href="#limitations">Limitations</a>
+    <a href="#recommendations">Recommendations</a>
+    <a href="#reproducibility">Reproducibility</a>
+    <a href="#acknowledgments">Acknowledgments</a>
+  </div>
+</nav>
+
+<main>
+<div class="wrap">
+
+<section id="abstract">
+  <h2>1. Title + Abstract</h2>
+  <h3>Abstract</h3>
+  <p>
+    This study investigates whether content pages can be grouped into distinct performance
+    archetypes using search visibility, clicks, click-through rate (CTR), and their observed
+    trends over a six-month period. Daily content-performance data were aggregated into
+    monthly page-level metrics for the October 2025 through March 2026 observation window,
+    and pages with performance observations in at least four of the six months were retained.
+    Six performance features were standardized and used to evaluate a rule-based baseline
+    against a K-Means clustering approach, with both methods evaluated on the same 30,000-page
+    sample. The rule-based baseline produced a silhouette score of <strong>-0.027875</strong>,
+    while the K-Means model with five clusters produced a silhouette score of
+    <strong>0.889132</strong>, indicating substantially stronger separation in the feature
+    space used for evaluation. The resulting segments were translated into reproducible
+    Protect, Improve, and Monitor recommendations intended to support content-review
+    prioritization rather than make causal claims about search performance.
+  </p>
+</section>
+
+<section id="introduction">
+  <h2>2. Introduction / Problem Statement</h2>
+  <p>
+    Large content inventories contain pages with substantially different levels and directions
+    of search performance. Some pages generate considerable search visibility and clicks, while
+    others have limited measurable activity or exhibit declining performance. Applying the same
+    optimization approach to every page can make content prioritization difficult.
+  </p>
+  <p>
+    This project examines whether pages can be grouped according to their observed
+    search-performance behavior using a combination of level and trend features.
+  </p>
+  <div class="callout">
+    <strong>Research question:</strong><br>
+    Can content pages be grouped into distinct performance archetypes using visibility, click,
+    CTR, and trend signals over the October 2025–March 2026 observation window, and can those
+    archetypes support reproducible content-prioritization recommendations?
+  </div>
+  <p>
+    The analysis is intended to support a practical content-review workflow. In particular,
+    the resulting segments are used as evidence for deciding which pages may warrant protection,
+    improvement, or monitoring.
+  </p>
+  <p>
+    The project does <strong>not</strong> attempt to establish that any particular content
+    action caused a change in Google Search performance. The analysis is observational and
+    should therefore be interpreted as decision support.
+  </p>
+</section>
+
+<section id="data">
+  <h2>3. Data</h2>
+
+  <h3>3.1 Dataset and observation window</h3>
+  <p>
+    The analysis uses the FlyRank internship warehouse's daily content-performance data.
+    The final feature-engineering analysis was restricted to:
+  </p>
+  <div class="callout"><strong>October 2025 through March 2026</strong></div>
+  <p>
+    Daily page-level search-performance measurements were aggregated to monthly values before
+    page-level features were calculated.
+  </p>
+
+  <h3>3.2 Monthly aggregation</h3>
+  <p>For each page and month, the analysis calculated:</p>
+  <ul>
+    <li>total impressions;</li>
+    <li>total clicks;</li>
+    <li>CTR, calculated as monthly clicks divided by monthly impressions when impressions were greater than zero;</li>
+    <li>average Google Search Console position.</li>
+  </ul>
+
+  <h3>3.3 Page inclusion criteria</h3>
+  <p>
+    Pages were required to have observations in at least <strong>four of the six months</strong>.
+    After feature engineering and this coverage filter, the final dataset contained
+    <strong>254,802 content pages</strong>.
+  </p>
+
+  <h3>3.4 Final clustering features</h3>
+  <table>
+    <thead><tr><th>Feature</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>avg_monthly_impressions</code></td><td>Average monthly search impressions.</td></tr>
+      <tr><td><code>avg_monthly_clicks</code></td><td>Average monthly clicks.</td></tr>
+      <tr><td><code>avg_ctr</code></td><td>Average monthly CTR.</td></tr>
+      <tr><td><code>impression_trend</code></td><td>Linear trend in monthly impressions.</td></tr>
+      <tr><td><code>click_trend</code></td><td>Linear trend in monthly clicks.</td></tr>
+      <tr><td><code>ctr_trend</code></td><td>Linear trend in monthly CTR.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>3.5 Trend calculation</h3>
+  <p>
+    Trend variables were calculated using an ordinary least-squares regression slope against
+    sequential month number. A positive slope indicates an increasing direction and a negative
+    slope indicates a decreasing direction. These slopes describe the observed direction during
+    the six-month window and are not forecasts.
+  </p>
+</section>
+
+<section id="methodology">
+  <h2>4. Methodology</h2>
+
+  <h3>4.1 Analytical approach</h3>
+  <ol>
+    <li>Aggregate daily performance to monthly page-level metrics.</li>
+    <li>Construct page-level performance and trend features.</li>
+    <li>Compare a rule-based baseline with K-Means clustering.</li>
+    <li>Translate the resulting segments into reproducible content-prioritization recommendations.</li>
+  </ol>
+
+  <h3>4.2 Feature standardization</h3>
+  <p>
+    The six clustering variables have substantially different numerical scales. The features
+    were therefore standardized using <code>StandardScaler</code> before K-Means clustering.
+  </p>
+
+  <h3>4.3 Rule-based baseline</h3>
+  <p>
+    A simple rule-based segmentation was created as an interpretable baseline. The baseline
+    classified pages using average impressions, average clicks, average CTR, and their observed
+    trends. Performance thresholds were based on empirical quantiles of the evaluation sample,
+    and performance and trend categories were combined into rule-based archetypes.
+  </p>
+  <p>
+    The baseline was used as a simple reference method rather than as a ground-truth labeling
+    system.
+  </p>
+
+  <h3>4.4 K-Means clustering</h3>
+  <p>
+    K-Means was selected because the objective was to identify groups of pages with similar
+    multivariate performance characteristics without requiring predefined labels.
+  </p>
+  <p>
+    The final model used <strong>K = 5</strong>. The five-cluster solution provided a compact
+    segmentation with strong separation in the evaluated feature space.
+  </p>
+
+  <h3>4.5 Baseline versus model validation</h3>
+  <p>
+    Because the dataset did not contain an independently verified archetype label, conventional
+    supervised metrics such as accuracy, precision, recall, and F1-score were not appropriate.
+    Both methods were instead evaluated on the <strong>same 30,000-page evaluation sample</strong>
+    and the same six-feature standardized representation.
+  </p>
+
+  <table>
+    <thead>
+      <tr><th>Method</th><th>Evaluation pages</th><th>Groups</th><th>Silhouette</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Rule-based baseline</td><td>30,000</td><td>7</td><td><strong>-0.027875</strong></td></tr>
+      <tr><td>K-Means (K=5)</td><td>30,000</td><td>5</td><td><strong>0.889132</strong></td></tr>
+    </tbody>
+  </table>
+
+  <div class="comparison">
+    <div class="metric-card">
+      <span>Rule-based baseline</span>
+      <strong>-0.027875</strong>
+      <span>Silhouette score · 30,000 pages · 7 groups</span>
+    </div>
+    <div class="metric-card">
+      <span>K-Means (K=5)</span>
+      <strong>0.889132</strong>
+      <span>Silhouette score · 30,000 pages · 5 groups</span>
+    </div>
+  </div>
+
+  <p>
+    The K-Means score is higher by <strong>0.917007 silhouette points</strong>. The negative
+    baseline score indicates substantial overlap between the rule-derived groups in the
+    evaluated feature space, while the K-Means result indicates much stronger geometric
+    separation.
+  </p>
+  <p>
+    This comparison is specifically a comparison of group separation in the selected feature
+    space. It does not establish that K-Means represents an objectively correct taxonomy or
+    that it is universally superior under different feature engineering, time windows, or
+    clustering methods.
+  </p>
+
+  <h3>4.6 Leakage considerations</h3>
+  <p>
+    The clustering features were derived from performance observations within the October
+    2025–March 2026 analysis window. The model does not use future performance beyond this
+    window as a prediction target, and it does not use a post-treatment outcome to determine
+    whether an optimization action succeeded.
+  </p>
+</section>
+
+<section id="results">
+  <h2>5. Results</h2>
+
+  <h3>5.1 Overall clustering result</h3>
+  <p>
+    The final K-Means model produced five performance segments across the full population of
+    <strong>254,802 pages</strong>.
+  </p>
+
+  <table>
+    <thead><tr><th>Cluster</th><th>Pages</th><th>Share</th></tr></thead>
+    <tbody>
+      <tr><td>Cluster 0</td><td>210,285</td><td>82.53%</td></tr>
+      <tr><td>Cluster 1</td><td>1,203</td><td>0.47%</td></tr>
+      <tr><td>Cluster 2</td><td>41,467</td><td>16.27%</td></tr>
+      <tr><td>Cluster 3</td><td>958</td><td>0.38%</td></tr>
+      <tr><td>Cluster 4</td><td>889</td><td>0.35%</td></tr>
+      <tr><th>Total</th><th>254,802</th><th>100%</th></tr>
+    </tbody>
+  </table>
+
+  <h3>5.2 Cluster characteristics</h3>
+
+  <p><strong>Cluster 0 — broad low-signal population.</strong>
+    Cluster 0 contains approximately 82.5% of all pages. Its average performance is relatively
+    low compared with the high-visibility segment, and its average CTR and trend values are
+    comparatively modest. Because it contains most pages, it should not be interpreted as a
+    homogeneous business category; it represents the broad majority of pages without the
+    distinctive high-volume or high-CTR patterns found in smaller clusters.</p>
+
+  <p><strong>Cluster 1 — high-visibility performance segment.</strong>
+    Cluster 1 contains 1,203 pages. Its average monthly impressions and clicks are substantially
+    higher than those of the other groups, with approximately 19,981 average monthly impressions,
+    78.34 average monthly clicks, and 0.00435 average CTR. Its average impression and click
+    trends are strongly positive. These pages represent a comparatively high-visibility segment
+    that may warrant closer review before significant content changes.</p>
+
+  <p><strong>Cluster 2 — moderate/high visibility segment.</strong>
+    Cluster 2 contains 41,467 pages. Its average monthly impressions are substantially above
+    the broad Cluster 0 population but below Cluster 1. The group also exhibits positive average
+    impression and click trends, representing pages with meaningful search visibility and
+    measurable activity.</p>
+
+  <p><strong>Clusters 3 and 4 — high-CTR, low-volume segments.</strong>
+    Clusters 3 and 4 are small groups characterized by relatively low absolute search volume
+    but unusually high CTR values compared with the broader population. They also have distinct
+    trend profiles, providing a reason to retain them as separate data-driven segments. Because
+    these groups are small, their characteristics should be interpreted cautiously.</p>
+
+  <h3>5.3 Baseline versus K-Means</h3>
+  <p>
+    The same-sample comparison provides the main quantitative validation in this project.
+    The rule-based baseline achieved a silhouette score of <strong>-0.027875</strong>, while
+    K-Means with five clusters achieved <strong>0.889132</strong>.
+  </p>
+  <div class="bar-row">
+    <div class="bar-label"><span>K-Means (absolute silhouette)</span><strong>0.889132</strong></div>
+    <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label"><span>Baseline (absolute silhouette)</span><strong>0.027875</strong></div>
+    <div class="bar-track"><div class="bar-fill" style="width:3.14%"></div></div>
+  </div>
+  <p class="footnote">
+    The bar display uses absolute magnitude only for visual scale; the baseline's actual silhouette
+    is negative. The exact values in the table above are authoritative.
+  </p>
+</section>
+
+<section id="limitations">
+  <h2>6. Limitations &amp; Honest Framing</h2>
+
+  <h3>6.1 No external ground-truth archetype labels</h3>
+  <p>
+    The dataset does not contain an independently verified label identifying the correct
+    performance archetype for each page. The clustering is therefore an unsupervised segmentation,
+    not a supervised classification problem.
+  </p>
+
+  <h3>6.2 Observational analysis</h3>
+  <p>
+    The analysis describes associations and observed performance patterns. It cannot establish
+    that a particular content optimization, update, rewrite, or other intervention caused an
+    increase or decrease in Google Search performance.
+  </p>
+
+  <h3>6.3 Six-month observation window</h3>
+  <p>
+    The analysis covers October 2025 through March 2026. Patterns observed during this period
+    may not remain stable indefinitely. Seasonality, changes in search demand, content changes,
+    technical changes, and other external factors may influence future performance.
+  </p>
+
+  <h3>6.4 Highly skewed performance distributions</h3>
+  <p>
+    Performance variables are highly skewed. Many pages have very low or zero observed
+    impressions and clicks, while a small number have very high volumes. Standardization makes
+    the features comparable in scale but does not eliminate the underlying skew.
+  </p>
+  <p>
+    A future robustness analysis could test transformations such as <code>log1p</code> and
+    compare whether the resulting segmentation remains stable. That robustness analysis was
+    not part of the final model.
+  </p>
+
+  <h3>6.5 Uneven cluster sizes</h3>
+  <p>
+    The final clustering contains one very large group and several small groups. This may reflect
+    genuine structure in the content population, but the smaller clusters should be interpreted
+    cautiously.
+  </p>
+
+  <h3>6.6 Recommendations are rule-derived</h3>
+  <p>
+    Protect, Improve, and Monitor are not independent labels supplied by the dataset. They are
+    decision rules constructed from observed performance and trend features. They should therefore
+    be treated as a reproducible prioritization framework rather than ground-truth classifications.
+  </p>
+</section>
+
+<section id="recommendations">
+  <h2>7. Ranked Recommendations</h2>
+
+  <p>
+    The clustering was translated into three operational queues. These queues are intended to
+    organize review attention rather than predict business outcomes.
+  </p>
+
+  <table>
+    <thead><tr><th>Action</th><th>Pages</th><th>Share</th><th>Interpretation</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Protect</strong></td>
+        <td>79</td>
+        <td>0.03%</td>
+        <td>High-visibility pages with positive impression and click signals and sufficient CTR.</td>
+      </tr>
+      <tr>
+        <td><strong>Improve</strong></td>
+        <td>33,043</td>
+        <td>12.97%</td>
+        <td>Pages with meaningful visibility plus at least one signal warranting investigation.</td>
+      </tr>
+      <tr>
+        <td><strong>Monitor</strong></td>
+        <td>221,680</td>
+        <td>87.00%</td>
+        <td>Pages without sufficient signal under the selected rules for immediate prioritization.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>7.1 Protect</h3>
+  <p>
+    The Protect queue contains pages meeting the highest-visibility and positive-performance
+    conditions in the action rules. The rule requires at least 30,000 average monthly impressions,
+    positive impression trend, CTR of at least 0.004, and a non-negative click trend.
+  </p>
+  <p>
+    These pages can be treated as high-visibility assets where unnecessary changes deserve
+    additional scrutiny. Protect does not mean that these pages should never be changed.
+  </p>
+
+  <h3>7.2 Improve</h3>
+  <p>
+    The Improve queue identifies pages with meaningful visibility but at least one performance
+    signal that warrants investigation, including declining impressions, declining clicks,
+    low CTR despite meaningful visibility, or growth accompanied by an improvement opportunity.
+  </p>
+  <p>
+    Follow-up review may consider search-intent alignment, title and snippet relevance,
+    content completeness, internal linking, content freshness, competing search results,
+    and technical/indexing conditions. These are investigation areas, not claims that any
+    individual factor caused the observed performance.
+  </p>
+
+  <h3>7.3 Monitor</h3>
+  <p>
+    The Monitor queue contains pages that do not meet the stronger conditions for Protect or
+    Improve. Its large size indicates that most pages in the analyzed population do not produce
+    sufficient signal under the selected rules to justify immediate prioritization.
+  </p>
+
+  <h3>7.4 Priority ordering</h3>
+  <p>
+    Within the action queues, a priority score was used to create a review order. The score
+    combines log-transformed visibility, the magnitude of impression and click trends, and an
+    action weighting. Its purpose is review sequencing, not measurement of business value.
+  </p>
+</section>
+
+<section id="reproducibility">
+  <h2>8. Reproducibility</h2>
+
+  <p>The core workflow is:</p>
+
+  <pre>Daily performance data
+        ↓
+Monthly aggregation
+        ↓
+October 2025–March 2026 window
+        ↓
+Minimum 4 months observed
+        ↓
+Page-level performance features
+        ↓
+Trend calculation
+        ↓
+Six clustering features
+        ↓
+StandardScaler
+        ↓
+K-Means, K=5
+        ↓
+Performance clusters
+        ↓
+Protect / Improve / Monitor rules
+        ↓
+Priority queue</pre>
+
+  <h3>Final analytical configuration</h3>
+  <table>
+    <tbody>
+      <tr><th>Analysis window</th><td>October 2025 – March 2026</td></tr>
+      <tr><th>Minimum observations</th><td>4 of 6 months</td></tr>
+      <tr><th>Final population</th><td>254,802 pages</td></tr>
+      <tr><th>Clustering features</th><td>6</td></tr>
+      <tr><th>Final K</th><td>5</td></tr>
+      <tr><th>Comparison sample</th><td>30,000 pages</td></tr>
+      <tr><th>Baseline silhouette</th><td>-0.027875</td></tr>
+      <tr><th>K-Means silhouette</th><td>0.889132</td></tr>
+    </tbody>
+  </table>
+
+  <p>
+    The analysis should be accompanied by the assignment notebooks and capstone notebook in the
+    project repository. The repository should contain the work used to produce the final results
+    and should not expose client names, domains, private queries, credentials, or raw private
+    exports.
+  </p>
+</section>
+
+<section id="acknowledgments">
+  <h2>9. Acknowledgments &amp; Data Credit</h2>
+  <div class="callout">
+    <strong>Built on the FlyRank ML Internship dataset.</strong>
+  </div>
+  <p>
+    This project was completed as part of the FlyRank ML Internship.
+  </p>
+  <p>
+    FlyRank:
+    <a href="https://flyrank.ai" target="_blank" rel="noopener noreferrer">flyrank.ai</a>
+  </p>
+  <p>
+    The analysis is intended for educational and research purposes within the internship project
+    and does not expose client names, domains, private queries, credentials, or raw private exports.
+  </p>
+</section>
+
+</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <strong>Structured Content Archetype Clustering for Content Prioritization</strong>
+    <p style="margin:8px 0 0;color:#aaa;">
+      FlyRank ML Internship · Lane 3 · Structured Content Archetype Clustering
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>
